@@ -6,5 +6,6 @@ namespace coinbaseapi.Models
     {
         public float Value { get; set; }
         public DateTime Date { get; set; }
+        public string Currency { get; set; }
     }
 }

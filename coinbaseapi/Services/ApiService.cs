@@ -16,12 +16,12 @@ namespace coinbaseapi.Services
         private HttpClient _httpClient;
         private int _pollingInterval;
         private IMemoryCache _cache;
-        private IHubContext<BTCHub> _hubContext;
+        private IHubContext<CoinHub> _hubContext;
 
         public ApiService(
           HttpClient httpClient,
           IMemoryCache cache,
-          IHubContext<BTCHub> hubContext)
+          IHubContext<CoinHub> hubContext)
         {
             _httpClient = httpClient;
             _pollingInterval = 10000;
@@ -29,20 +29,27 @@ namespace coinbaseapi.Services
             _hubContext = hubContext;
         }
 
-        public async Task<Price> GetCurrentBtcPrice()
+        public async Task<Price[]> GetCurrentCoinPrice()
         {
-            var response = await _httpClient.GetStringAsync("https://api.coindesk.com/v1/bpi/currentprice/NZD");
+            var response = await _httpClient.GetStringAsync("https://api.coingecko.com/api/v3/simple/price?vs_currencies=nzd&include_last_updated_at=true&ids=bitcoin,ethereum");
             CurrentPriceResponse currentPrice = JsonConvert.DeserializeObject<CurrentPriceResponse>(response);
-            return new Price() { Value = currentPrice.BPI.NZD.RateFloat, Date = Convert.ToDateTime(currentPrice.Time.UpdatedIso) };
+            DateTimeOffset dateTimeOffsetBTC = DateTimeOffset.FromUnixTimeSeconds(currentPrice.ethereum.last_updated_at);
+            DateTimeOffset dateTimeOffsetETH = DateTimeOffset.FromUnixTimeSeconds(currentPrice.bitcoin.last_updated_at);
+            Price[] prices = new Price[2];
+            prices[0] = new Price() { Value = currentPrice.bitcoin.nzd, Date = dateTimeOffsetBTC.DateTime.ToLocalTime(), Currency = "Bitcoin" };
+            prices[1] = new Price() { Value = currentPrice.ethereum.nzd, Date = dateTimeOffsetETH.DateTime.ToLocalTime(), Currency = "Ethereum" };
+            return prices;
         }
 
         public async Task StartPollingCoindesk()
         {
             while (true)
             {
-                Price currentPrice = await GetCurrentBtcPrice();
-                AddPriceToListInMemory(currentPrice);
-                SendCurrentPriceToHub(currentPrice);
+                Price[] currentPrices = await GetCurrentCoinPrice();
+                AddPriceToListInMemory(currentPrices[0]);
+                AddPriceToListInMemory(currentPrices[1]);
+                SendCurrentPriceToHub(currentPrices[0]);
+                SendCurrentPriceToHub(currentPrices[1]);
                 Thread.Sleep(_pollingInterval);
             }
         }

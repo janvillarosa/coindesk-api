@@ -5,12 +5,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace coinbaseapi.Hubs
 {
-    public class BTCHub : Hub
+    public class CoinHub : Hub
     {
         private readonly IApiService _apiService;
         private readonly IMemoryCache _memoryCache;
 
-        public BTCHub(IApiService apiService, IMemoryCache memoryCache)
+        public CoinHub(IApiService apiService, IMemoryCache memoryCache)
         {
             _apiService = apiService;
             _memoryCache = memoryCache;
