@@ -44,10 +44,11 @@ namespace coinbaseapi.Services
             while (true)
             {
                 Price[] currentPrices = await GetCurrentCoinPrice();
-                AddPriceToListInMemory(currentPrices[0]);
-                AddPriceToListInMemory(currentPrices[1]);
-                SendCurrentPriceToHub(currentPrices[0]);
-                SendCurrentPriceToHub(currentPrices[1]);
+                foreach (Price currentPrice in currentPrices)
+                {
+                    AddPriceToListInMemory(currentPrice);
+                    SendCurrentPriceToHub(currentPrice);
+                }
                 Thread.Sleep(_pollingInterval);
             }
         }
