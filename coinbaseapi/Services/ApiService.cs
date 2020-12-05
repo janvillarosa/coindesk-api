@@ -31,9 +31,20 @@ namespace coinbaseapi.Services
 
         public async Task<Price[]> GetCurrentCoinPrice()
         {
-            var response = await _httpClient.GetStringAsync("https://api.coingecko.com/api/v3/simple/price?vs_currencies=nzd&include_last_updated_at=true&ids=bitcoin,ethereum");
-            CurrentPriceResponse currentPrice = JsonConvert.DeserializeObject<CurrentPriceResponse>(response);
+            var response = "";
+            try
+            {
+                response = await _httpClient.GetStringAsync("https://api.coingecko.com/api/v3/simple/price?vs_currencies=nzd&include_last_updated_at=true&ids=bitcoin,ethereum");
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("\nException Caught!");
+                Console.WriteLine("Message :{0} ", e.Message);
+                //return empty Price array
+                return new Price[0];
+            }
             Price[] prices = new Price[2];
+            CurrentPriceResponse currentPrice = JsonConvert.DeserializeObject<CurrentPriceResponse>(response);
             prices[0] = new Price() { Value = currentPrice.bitcoin.nzd, Date = DateTimeOffset.Now.DateTime, Currency = "Bitcoin" };
             prices[1] = new Price() { Value = currentPrice.ethereum.nzd, Date = DateTimeOffset.Now.DateTime, Currency = "Ethereum" };
             return prices;
