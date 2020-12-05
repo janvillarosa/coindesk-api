@@ -33,11 +33,9 @@ namespace coinbaseapi.Services
         {
             var response = await _httpClient.GetStringAsync("https://api.coingecko.com/api/v3/simple/price?vs_currencies=nzd&include_last_updated_at=true&ids=bitcoin,ethereum");
             CurrentPriceResponse currentPrice = JsonConvert.DeserializeObject<CurrentPriceResponse>(response);
-            DateTimeOffset dateTimeOffsetBTC = DateTimeOffset.FromUnixTimeSeconds(currentPrice.ethereum.last_updated_at);
-            DateTimeOffset dateTimeOffsetETH = DateTimeOffset.FromUnixTimeSeconds(currentPrice.bitcoin.last_updated_at);
             Price[] prices = new Price[2];
-            prices[0] = new Price() { Value = currentPrice.bitcoin.nzd, Date = dateTimeOffsetBTC.DateTime.ToLocalTime(), Currency = "Bitcoin" };
-            prices[1] = new Price() { Value = currentPrice.ethereum.nzd, Date = dateTimeOffsetETH.DateTime.ToLocalTime(), Currency = "Ethereum" };
+            prices[0] = new Price() { Value = currentPrice.bitcoin.nzd, Date = DateTimeOffset.Now.DateTime, Currency = "Bitcoin" };
+            prices[1] = new Price() { Value = currentPrice.ethereum.nzd, Date = DateTimeOffset.Now.DateTime, Currency = "Ethereum" };
             return prices;
         }
 
