@@ -32,9 +32,10 @@ namespace coinbaseapi.Services
         public async Task<Price[]> GetCurrentCoinPrice()
         {
             var response = "";
+            const string URL = "https://api.coingecko.com/api/v3/simple/price?vs_currencies=nzd&include_last_updated_at=true&ids=bitcoin,ethereum";
             try
             {
-                response = await _httpClient.GetStringAsync("https://api.coingecko.com/api/v3/simple/price?vs_currencies=nzd&include_last_updated_at=true&ids=bitcoin,ethereum");
+                response = await _httpClient.GetStringAsync(URL);
             }
             catch (HttpRequestException e)
             {
